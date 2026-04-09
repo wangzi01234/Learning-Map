@@ -1,0 +1,417 @@
+.app-shell {
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--ui-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+.app-shell > .app-grid-six.ant-layout-content {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+/* 整页 3×2 共 6 格：上行标题左右 · 中行图谱+节点（占比最大）· 下行 LLM+TODO */
+.app-grid-six {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto minmax(0, 3fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Learning MD：标题行 · 下方左 LLM / 右文档（同高） */
+.app-grid-learning-md {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.app-grid-cell--md-workspace {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.app-grid-cell--md-workspace > .lmw-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 第一块：左上品牌与标题，右上模式切换 */
+.app-header-brand-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.app-header-mode-switch-wrap {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-top: 2px;
+}
+
+.app-shell--popout {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell--popout > .app-popout-inner.ant-layout-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.app-popout-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px 14px;
+  background: var(--ui-header-bg);
+  border-bottom: 2px var(--ui-line-style) var(--ui-header-border);
+  padding: 8px 10px 10px;
+  box-sizing: border-box;
+}
+
+.app-popout-title {
+  margin: 0 !important;
+  flex: 0 0 auto;
+  align-self: center;
+  font-family: var(--ui-font-display) !important;
+}
+
+.app-popout-toolbar {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.app-popout-doc {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-grid-cell {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 标题层：左品牌、右工具，底边与内容区一致分隔 */
+.app-grid-cell--title-left,
+.app-grid-cell--title-right {
+  overflow: visible;
+  background: var(--ui-header-bg);
+  border-bottom: 2px var(--ui-line-style) var(--ui-header-border);
+  padding: 8px 10px 10px;
+  box-sizing: border-box;
+}
+
+.app-grid-cell--title-left {
+  padding-left: 6px;
+}
+
+.app-grid-cell--title-right {
+  padding-left: 8px;
+  padding-top: 12px;
+  border-left: 1px var(--ui-line-style) var(--ui-midline);
+}
+
+.app-header-brand-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.app-header-toolbar-wrap {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.app-header-toolbar-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.app-header-toolbar-main .ct-root {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.app-brand-icon {
+  flex-shrink: 0;
+}
+
+.app-title {
+  margin: 0 !important;
+  font-size: 1.35rem !important;
+  line-height: 1.2 !important;
+  font-family: var(--ui-font-display) !important;
+  color: var(--ui-text) !important;
+}
+
+.app-site-tagline {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  display: block;
+  width: 100%;
+  max-width: none;
+  padding-left: 40px;
+  box-sizing: border-box;
+  color: var(--ui-text-secondary) !important;
+}
+
+.app-grid-cell--graph > *,
+.app-grid-cell--node > *,
+.app-grid-cell--chat > *,
+.app-grid-cell--todo > * {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.sketch-modal .ant-modal-content {
+  border-radius: 16px;
+  border: 2px var(--ui-line-style) var(--ui-modal-border);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.06);
+}
+
+.sketch-modal .ant-modal-header {
+  border-bottom: 1px var(--ui-line-style) var(--ui-header-border);
+  font-family: var(--ui-font-display);
+}
+
+/* 蒙德里安：无格间距、无边框，仅靠色块拼接；左下红、右中黄、右下白 */
+html[data-ui-theme="mondrian"] .app-grid-six {
+  gap: 0;
+  padding: 0;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--title-left,
+html[data-ui-theme="mondrian"] .app-grid-cell--title-right {
+  border-bottom: none !important;
+  border-left: none !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--title-left {
+  background: #ffdd00;
+  padding: 8px 10px 10px 10px;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--title-right {
+  background: #005baa;
+  --ui-toolbar-label: #ffffff;
+  padding: 8px 10px 10px 10px;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--title-right .theme-switcher-trigger.ant-btn {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--title-right .theme-switcher-trigger.ant-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--graph {
+  background: #ffffff;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--graph .kg-wrap {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+/* 右中 节点详情：黄 */
+html[data-ui-theme="mondrian"] .app-grid-cell--node {
+  background: #ffdd00;
+  --ui-text: #000000;
+  --ui-text-soft: #000000;
+  --ui-text-muted: #333333;
+  --ui-text-h3: #000000;
+}
+
+/* 左下 LLM：红 */
+html[data-ui-theme="mondrian"] .app-grid-cell--chat {
+  background: #e30613;
+  --ui-text: #ffffff;
+  --ui-text-soft: #ffffff;
+  --ui-text-muted: rgba(255, 255, 255, 0.85);
+  --ui-text-h3: #ffffff;
+  --ui-text-secondary: rgba(255, 255, 255, 0.9);
+}
+
+/* 右下 TODO：白 */
+html[data-ui-theme="mondrian"] .app-grid-cell--todo {
+  background: #ffffff;
+  --ui-text: #000000;
+  --ui-text-soft: #000000;
+  --ui-text-muted: #333333;
+  --ui-text-h3: #000000;
+  --ui-todo-done: rgba(0, 0, 0, 0.45);
+  --ui-checkbox-border: #000000;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-doc {
+  background: #ffffff;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-assist:not(.lmw-assist--collapsed) {
+  background: #e30613;
+  --ui-text: #ffffff;
+  --ui-text-soft: #ffffff;
+  --ui-text-muted: rgba(255, 255, 255, 0.85);
+  --ui-text-h3: #ffffff;
+  --ui-text-secondary: rgba(255, 255, 255, 0.9);
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-assist .map-assist-root.cp-root {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-collapse-edge {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--chat .cp-root {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--todo .sketch-todo {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+html[data-ui-theme="mondrian"] .sketch-card,
+html[data-ui-theme="mondrian"] .sketch-card::before,
+html[data-ui-theme="mondrian"] .cp-root,
+html[data-ui-theme="mondrian"] .sketch-textarea,
+html[data-ui-theme="mondrian"] .sketch-input,
+html[data-ui-theme="mondrian"] .sketch-btn,
+html[data-ui-theme="mondrian"] .sketch-btn-primary,
+html[data-ui-theme="mondrian"] .kg-tooltip,
+html[data-ui-theme="mondrian"] .nc-img,
+html[data-ui-theme="mondrian"] .nc-code,
+html[data-ui-theme="mondrian"] .sketch-tag,
+html[data-ui-theme="mondrian"] .tp-check .ant-checkbox-inner,
+html[data-ui-theme="mondrian"] .sketch-modal .ant-modal-content,
+html[data-ui-theme="mondrian"] .sketch-modal .ant-modal-header {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="mondrian"] .sketch-card::before {
+  display: none !important;
+}
+
+html[data-ui-theme="mondrian"] .nc-actions,
+html[data-ui-theme="mondrian"] .nc-explain-chat {
+  border-top: none !important;
+}
+
+html[data-ui-theme="mondrian"] .tp-item {
+  border-bottom: none !important;
+}
+
+html[data-ui-theme="mondrian"] .cp-send.ant-btn {
+  border: none !important;
+}
+
+html[data-ui-theme="mondrian"] .cp-compose .cp-send.ant-btn {
+  border-left: 1px solid rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .map-assist-compose .cp-send.ant-btn {
+  border-left: none !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-ui-theme="mondrian"] .app-header-toolbar-wrap .ant-select .ant-select-selector,
+html[data-ui-theme="mondrian"] .app-header-toolbar-wrap .ant-btn {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="mondrian"] .necm-thread,
+html[data-ui-theme="mondrian"] .necm-bubble--user,
+html[data-ui-theme="mondrian"] .necm-bubble--ai,
+html[data-ui-theme="mondrian"] .necm-apply-bar {
+  border: none !important;
+}
+
+/* 蒙德里安：Ant Design 与 sketch-* 控件一律直角（覆盖组件内联圆角） */
+html[data-ui-theme="mondrian"] .ant-btn,
+html[data-ui-theme="mondrian"] .ant-input,
+html[data-ui-theme="mondrian"] .ant-input-affix-wrapper,
+html[data-ui-theme="mondrian"] .ant-input-textarea textarea,
+html[data-ui-theme="mondrian"] .ant-select .ant-select-selector,
+html[data-ui-theme="mondrian"] .ant-modal-content,
+html[data-ui-theme="mondrian"] .ant-modal-header,
+html[data-ui-theme="mondrian"] .ant-checkbox .ant-checkbox-inner,
+html[data-ui-theme="mondrian"] .sketch-btn,
+html[data-ui-theme="mondrian"] .sketch-btn-primary,
+html[data-ui-theme="mondrian"] .sketch-textarea,
+html[data-ui-theme="mondrian"] .sketch-input,
+html[data-ui-theme="mondrian"] .sketch-tag,
+html[data-ui-theme="mondrian"] .ct-select .ant-select-selector,
+html[data-ui-theme="mondrian"] .cp-send,
+html[data-ui-theme="mondrian"] .necm-thread,
+html[data-ui-theme="mondrian"] .necm-bubble--user,
+html[data-ui-theme="mondrian"] .necm-bubble--ai,
+html[data-ui-theme="mondrian"] .necm-apply-bar {
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="mondrian"] .tp-add {
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="mondrian"] .cp-compose {
+  border-radius: 0 !important;
+}

@@ -1,0 +1,49 @@
+# 环境与密钥（切勿提交）
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.egg-info/
+dist/
+build/
+
+# Node / 前端
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+
+# 日志与临时文件
+*.log
+logs/
+tmp/
+temp/
+
+# 操作系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Cursor 编辑器（任意层级下的 .cursor 目录）
+.cursor/
+**/.cursor/
+
+# 笔记文档（不入库）
+backend/docs_md/

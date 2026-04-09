@@ -1,0 +1,20 @@
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.theme-switcher-trigger.ant-btn {
+  height: auto !important;
+  padding: 4px 6px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: var(--ui-font-display) !important;
+  color: var(--ui-text-muted) !important;
+  line-height: 1.2 !important;
+}
+
+.theme-switcher-trigger.ant-btn:hover {
+  color: var(--ui-link) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+}

@@ -1,0 +1,131 @@
+.cp-root {
+  margin-top: 0;
+  padding: 12px 14px 14px;
+  border-radius: var(--ui-radius-lg);
+  background: var(--ui-panel-chat);
+  border: 2px var(--ui-line-style) var(--ui-panel-border);
+  box-shadow: var(--ui-panel-shadow);
+}
+
+.app-grid-cell--chat .cp-root {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+
+.cp-compose {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--ui-chat-compose-bg, #ffffff);
+  border: 1px solid var(--ui-chat-compose-border, var(--ui-border-dash));
+  border-radius: var(--ui-radius-md);
+  overflow: hidden;
+}
+
+.app-grid-cell--chat .cp-compose {
+  flex: 1;
+  min-height: 0;
+}
+
+.cp-compose-field {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TextArea 根节点（随主题可能是 ant-input-css-var 等） */
+.cp-compose-field > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-grid-cell--chat .cp-compose .sketch-textarea {
+  min-height: 44px !important;
+  flex: 1;
+  resize: none !important;
+}
+
+.app-grid-cell--chat .cp-head {
+  margin-bottom: 4px;
+}
+
+.app-grid-cell--chat .cp-hint {
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+.cp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.cp-title {
+  font-family: var(--ui-font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ui-text-soft);
+}
+
+.cp-hint {
+  flex-basis: 100%;
+  font-size: 12px !important;
+}
+
+.cp-compose .sketch-textarea {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: var(--ui-chat-compose-bg, #ffffff) !important;
+}
+
+.cp-compose .sketch-textarea textarea {
+  background: var(--ui-chat-compose-bg, #ffffff) !important;
+}
+
+.sketch-textarea {
+  border-radius: var(--ui-radius-md) !important;
+  border: 2px var(--ui-line-style) var(--ui-border-dash) !important;
+  font-family: var(--ui-font-body) !important;
+  resize: none !important;
+}
+
+.cp-compose .cp-send.ant-btn {
+  font-family: var(--ui-font-body) !important;
+  background: var(--ui-chat-compose-bg, #ffffff) !important;
+  color: var(--ui-link) !important;
+  border: none !important;
+  border-left: 1px solid var(--ui-divider-soft, var(--ui-divider)) !important;
+  box-shadow: none !important;
+}
+
+.cp-compose .cp-send.ant-btn:hover {
+  background: var(--ui-chat-compose-bg, #ffffff) !important;
+  color: var(--ui-link-hover) !important;
+}
+
+.cp-compose .cp-send.ant-btn:focus-visible {
+  outline: 2px solid var(--ui-link);
+  outline-offset: -2px;
+}
+
+.cp-send {
+  height: auto !important;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  line-height: 1 !important;
+  border-radius: 0 !important;
+  flex-shrink: 0;
+  align-self: stretch;
+}

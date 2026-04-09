@@ -1,0 +1,17 @@
+.ams-segmented.ant-segmented {
+  font-family: var(--ui-font-display);
+}
+
+.ams-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-ui-theme="mondrian"] .ams-segmented.ant-segmented {
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="mondrian"] .ams-segmented .ant-segmented-item {
+  border-radius: 0 !important;
+}

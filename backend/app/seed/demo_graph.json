@@ -1,0 +1,71 @@
+{
+  "initial_nodes": [
+    {
+      "id": "demo-overview",
+      "name": "主题概览（示例）",
+      "year": 0,
+      "category": "示例",
+      "description": "可作为任意学习路线的入口节点；标题与说明均可按你的主题修改。",
+      "details": {
+        "explanation": "本节点用于演示图谱的基本用法：点击节点查看卡片，阅读说明、公式与外链；通过连线表达概念之间的关系。将内容替换为你自己的学科或项目即可。",
+        "formula": null,
+        "animation": "占位：可在此嵌入示意图或动画。",
+        "images": [
+          "https://placehold.co/480x200/e8f4fc/4a6fa5?text=Overview"
+        ],
+        "code": null,
+        "links": []
+      }
+    },
+    {
+      "id": "demo-core",
+      "name": "核心要点（示例）",
+      "year": 0,
+      "category": "示例",
+      "description": "展开后可在卡片中补充定义、推导与参考资料。",
+      "details": {
+        "explanation": "把关键定义、易错点或步骤写在这里；右侧可加入代码片段。适合作为图谱中需要反复回顾的「锚点」概念。",
+        "formula": null,
+        "animation": "占位：核心关系或流程示意。",
+        "images": [
+          "https://placehold.co/480x200/f0f8e8/5a7a4a?text=Core"
+        ],
+        "code": "# 可在此放置简短示例代码或伪代码",
+        "links": []
+      }
+    },
+    {
+      "id": "demo-next",
+      "name": "拓展方向（示例）",
+      "year": 0,
+      "category": "示例",
+      "description": "提示下一步阅读、实验或与相邻主题的衔接。",
+      "details": {
+        "explanation": "用于连接更广的主题或实践任务。可配合侧栏的 LLM 扩展与 TODO，把新节点、新关系追加到图谱中。",
+        "formula": null,
+        "animation": "占位：拓展路径示意。",
+        "images": [
+          "https://placehold.co/480x200/fcf8e8/c49a4a?text=Next"
+        ],
+        "code": null,
+        "links": []
+      }
+    }
+  ],
+  "initial_edges": [
+    {
+      "id": "e1",
+      "source": "demo-overview",
+      "target": "demo-core",
+      "relation": "包含",
+      "label": "包含"
+    },
+    {
+      "id": "e2",
+      "source": "demo-core",
+      "target": "demo-next",
+      "relation": "引申",
+      "label": "引申"
+    }
+  ]
+}

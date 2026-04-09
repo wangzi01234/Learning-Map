@@ -1,0 +1,101 @@
+.map-assist-root.cp-root {
+  margin-top: 0;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* 仅外层 .lmw-assist 保留虚线框，内层面板与输入区不再描边 */
+  border: none;
+  box-shadow: none;
+}
+
+.map-assist-root .map-assist-compose.cp-compose {
+  border: none;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.map-assist-root .map-assist-compose-field.cp-compose-field {
+  width: 100%;
+  min-height: 0;
+}
+
+.map-assist-root .map-assist-compose .cp-send.ant-btn {
+  border-left: none !important;
+  border-top: 1px solid var(--ui-divider-soft, var(--ui-divider)) !important;
+  width: 100%;
+  justify-content: center;
+}
+
+.map-assist-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  flex-shrink: 0;
+}
+
+.map-assist-title {
+  font-weight: 700;
+  font-family: var(--ui-font-display);
+  font-size: 14px;
+  color: var(--ui-text);
+}
+
+.map-assist-hint {
+  flex: 1 1 100%;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
+.map-assist-thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 2px 8px 0;
+}
+
+.map-assist-empty {
+  font-size: 12px !important;
+  padding: 8px 4px;
+}
+
+.map-assist-bubble {
+  padding: 8px 10px;
+  border-radius: var(--ui-radius-md);
+  border: 1px solid var(--ui-border-dash, rgba(0, 0, 0, 0.12));
+  max-width: 100%;
+}
+
+.map-assist-bubble--user {
+  align-self: flex-end;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.map-assist-bubble--assistant {
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.map-assist-bubble-text {
+  white-space: pre-wrap;
+  font-size: 12px !important;
+  margin: 0 !important;
+}
+
+.map-assist-compose.cp-compose {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+/* 避免 ChatPanel 全局 .cp-compose-field > * { flex:1 } 把输入区撑满导致无法二次发送 */
+.map-assist-root .map-assist-compose-field.cp-compose-field > * {
+  flex: 0 1 auto !important;
+  min-height: 112px !important;
+}

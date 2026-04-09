@@ -1,0 +1,182 @@
+.sketch-card {
+  background: var(--ui-card-bg);
+  border-radius: 18px;
+  padding: 18px 20px;
+  border: 2px var(--ui-line-style) var(--ui-card-border);
+  box-shadow: var(--ui-card-shadow);
+  position: relative;
+}
+
+.sketch-card::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 14px;
+  pointer-events: none;
+  border: 1px solid var(--ui-card-inner);
+}
+
+.nc-root {
+  max-height: calc(100vh - 108px);
+  overflow-y: auto;
+}
+
+.app-grid-cell--node .sketch-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-grid-cell--node .nc-root {
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-grid-cell--node .nc-empty {
+  flex: 1;
+  min-height: 0;
+}
+
+.nc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  color: var(--ui-text-muted);
+  text-align: center;
+  font-family: var(--ui-font-body);
+}
+
+.nc-header {
+  margin-bottom: 12px;
+}
+
+.nc-title {
+  font-family: var(--ui-font-display);
+  font-size: 1.55rem;
+  margin: 0 0 8px;
+  color: var(--ui-text);
+}
+
+.sketch-tag {
+  border-radius: 999px !important;
+  border: 1px var(--ui-line-style) var(--ui-tag-border) !important;
+  background: var(--ui-tag-bg) !important;
+  color: var(--ui-tag-text) !important;
+  font-family: var(--ui-font-display);
+}
+
+.sketch-tag-accent {
+  background: var(--ui-tag-accent) !important;
+}
+
+.nc-section {
+  margin-bottom: 14px;
+}
+
+.nc-h3 {
+  font-family: var(--ui-font-display);
+  font-size: 0.95rem;
+  margin: 0 0 6px;
+  color: var(--ui-text-h3);
+}
+
+.nc-lead {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--ui-text-soft);
+  font-family: var(--ui-font-body);
+}
+
+.nc-md {
+  font-family: var(--ui-font-body);
+  line-height: 1.55;
+  color: var(--ui-text-soft);
+}
+
+.nc-explain-chat {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px var(--ui-line-style) var(--ui-border-dash-weak);
+}
+
+.nc-formula .katex-display {
+  margin: 0.4em 0;
+}
+
+.nc-muted {
+  opacity: 0.95;
+  font-size: 13px;
+  color: var(--ui-text-muted);
+}
+
+.nc-img {
+  border-radius: 12px !important;
+  border: 1px var(--ui-line-style) var(--ui-code-border) !important;
+}
+
+.nc-code {
+  border-radius: 12px !important;
+  border: 1px var(--ui-line-style) var(--ui-code-border) !important;
+  font-size: 12px !important;
+}
+
+.nc-links {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.nc-inline-icon {
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
+
+.nc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px var(--ui-line-style) var(--ui-divider);
+}
+
+.sketch-btn,
+.sketch-btn-primary {
+  border-radius: 999px !important;
+  font-family: var(--ui-font-body) !important;
+  border: 2px var(--ui-line-style) var(--ui-border-strong) !important;
+  height: auto !important;
+  padding: 6px 16px !important;
+}
+
+.sketch-btn-primary {
+  background: linear-gradient(180deg, var(--ui-primary-soft-1), var(--ui-primary-soft-2)) !important;
+  border-color: var(--ui-primary) !important;
+  color: var(--ui-primary-text) !important;
+}
+
+.sketch-btn {
+  background: var(--ui-btn-outline-bg) !important;
+}
+
+.sketch-btn:hover,
+.sketch-btn-primary:hover {
+  filter: brightness(0.97);
+}
+
+/* 蒙德里安 · 右中：去掉白底圆角卡片层，内容直接铺在格底色上 */
+html[data-ui-theme="mondrian"] .app-grid-cell--node .sketch-card {
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 12px 14px;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--node .sketch-card::before {
+  content: none !important;
+  display: none !important;
+}

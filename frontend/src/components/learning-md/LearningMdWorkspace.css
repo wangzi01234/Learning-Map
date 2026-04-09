@@ -1,0 +1,92 @@
+.lmw-root {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.lmw-assist {
+  flex: 0 0 20%;
+  min-width: 200px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 0;
+  border-radius: var(--ui-radius-md);
+  border: 2px var(--ui-line-style) var(--ui-panel-border);
+  overflow: hidden;
+  background: var(--ui-panel-chat);
+  box-sizing: border-box;
+}
+
+.lmw-assist--collapsed {
+  flex: 0 0 28px;
+  min-width: 28px;
+  max-width: 28px;
+  flex-direction: column;
+}
+
+.lmw-assist-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lmw-collapse-edge {
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  color: var(--ui-text-muted);
+  font: inherit;
+  line-height: 0;
+}
+
+.lmw-assist--collapsed .lmw-collapse-edge {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+.lmw-collapse-edge:hover {
+  color: var(--ui-link);
+  background: transparent;
+}
+
+.lmw-collapse-edge:focus-visible {
+  outline: 2px solid var(--ui-link);
+  outline-offset: 2px;
+}
+
+.lmw-doc {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html[data-ui-theme="mondrian"] .lmw-assist {
+  border-radius: 0;
+  border: none;
+}
+

@@ -1,0 +1,51 @@
+.app-grid-cell--graph .kg-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.kg-wrap {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ui-kg-bg);
+  border: 2px var(--ui-line-style) var(--ui-kg-border);
+  box-shadow: var(--ui-kg-shadow, 4px 4px 0 rgba(0, 0, 0, 0.04));
+}
+
+.kg-canvas {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.kg-tooltip {
+  position: fixed;
+  z-index: 1000;
+  max-width: 280px;
+  padding: 10px 12px;
+  pointer-events: none;
+  background: var(--ui-tooltip-bg);
+  border: 2px var(--ui-line-style) var(--ui-tooltip-border);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.06);
+  font-family: var(--ui-font-body);
+}
+
+.kg-tooltip-title {
+  font-family: var(--ui-font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ui-tooltip-title);
+  margin-bottom: 4px;
+}
+
+.kg-tooltip-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ui-tooltip-desc);
+}
