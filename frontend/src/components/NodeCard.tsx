@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Space, Tag, Typography, Image, message } from "antd";
 import { BookOpen, Link as LinkIcon, MessageCircle, PlusSquare, Zap } from "react-feather";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -23,6 +24,7 @@ interface Props {
 
 export function NodeCard({ node, onAddRelation }: Props) {
   const [recLoading, setRecLoading] = useState(false);
+  const [extendStream, setExtendStream] = useState("");
   const [explainChatOpen, setExplainChatOpen] = useState(false);
   const addTodo = useAppStore((s) => s.addTodo);
   const { nodes, edges, applyExtendResult, currentCaseSlug } = useAppStore(
@@ -37,6 +39,7 @@ export function NodeCard({ node, onAddRelation }: Props) {
   const recommendTodos = async () => {
     if (!node) return;
     setRecLoading(true);
+    setExtendStream("");
     try {
       const existingNodes = nodes.map((n) => n.id);
       const existingEdges: [string, string, string][] = edges.map((e) => [
@@ -44,17 +47,21 @@ export function NodeCard({ node, onAddRelation }: Props) {
         e.target,
         e.relation,
       ]);
-      const res = await postExtend({
-        prompt: `用户正在浏览知识点「${node.name}」（节点 id=${node.id}）。请根据该知识点生成 2～3 条「待学 TODO」，优先放在 newTodos 中；若确有必要可补充少量 newNodes/newEdges，否则可为空数组。`,
-        case_slug: currentCaseSlug,
-        context: { existingNodes, existingEdges },
-      });
+      const res = await postExtend(
+        {
+          prompt: `用户正在浏览知识点「${node.name}」（节点 id=${node.id}）。请根据该知识点生成 2～3 条「待学 TODO」，优先放在 newTodos 中；若确有必要可补充少量 newNodes/newEdges，否则可为空数组。`,
+          case_slug: currentCaseSlug,
+          context: { existingNodes, existingEdges },
+        },
+        { onDelta: (t) => setExtendStream((s) => s + t) }
+      );
       applyExtendResult(res);
       message.success("已加入推荐待学（并可能补充相关节点）");
     } catch (e) {
       message.error(e instanceof Error ? e.message : String(e));
     } finally {
       setRecLoading(false);
+      setExtendStream("");
     }
   };
 
@@ -87,10 +94,7 @@ export function NodeCard({ node, onAddRelation }: Props) {
       <div className="nc-section">
         <h3 className="nc-h3">通俗解释</h3>
         <div className="nc-md">
-          <ReactMarkdown
-            remarkPlugins={[remarkMath]}
-            rehypePlugins={[rehypeKatex]}
-          >
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
             {d.explanation || "_暂无_"}
           </ReactMarkdown>
         </div>
@@ -110,10 +114,7 @@ export function NodeCard({ node, onAddRelation }: Props) {
         <div className="nc-section">
           <h3 className="nc-h3">公式</h3>
           <div className="nc-md nc-formula">
-            <ReactMarkdown
-              remarkPlugins={[remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-            >
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
               {`$$${d.formula}$$`}
             </ReactMarkdown>
           </div>
@@ -208,6 +209,11 @@ export function NodeCard({ node, onAddRelation }: Props) {
           添加关系
         </Button>
       </div>
+      {recLoading && extendStream ? (
+        <pre className="nc-extend-stream" aria-live="polite">
+          {extendStream}
+        </pre>
+      ) : null}
     </div>
   );
 }

@@ -25,7 +25,7 @@
 .mdmp-md pre {
   padding: 12px 14px;
   overflow: auto;
-  border-radius: 8px;
+  border-radius: 0;
   border: 1px solid var(--ui-border-dash, rgba(0, 0, 0, 0.12));
   background: rgba(0, 0, 0, 0.03);
 }
@@ -37,4 +37,24 @@
 
 .mdmp-md pre code {
   font-size: 13px;
+}
+
+.mdmp-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.95em;
+}
+
+.mdmp-md th,
+.mdmp-md td {
+  border: 1px solid var(--ui-border-dash, rgba(0, 0, 0, 0.12));
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mdmp-md th {
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
 }

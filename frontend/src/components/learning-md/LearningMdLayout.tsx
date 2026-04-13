@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Button, Segmented } from "antd";
-import { ExternalLink } from "react-feather";
+import { Button, Segmented, message } from "antd";
+import { ExternalLink, RefreshCw, Save } from "react-feather";
 import { useShallow } from "zustand/react/shallow";
 import { MdMarkdownPreview } from "@/components/learning-md/MdMarkdownPreview";
 import { useLearningMdStore } from "@/store/useLearningMdStore";
@@ -23,13 +23,33 @@ interface LearningMdLayoutProps {
 
 export function LearningMdLayout({ showPopoutButton = true }: LearningMdLayoutProps) {
   const [pane, setPane] = useState<PaneMode>("split");
-  const { draft, setDraft, loadingDoc } = useLearningMdStore(
-    useShallow((s) => ({
-      draft: s.draft,
-      setDraft: s.setDraft,
-      loadingDoc: s.loadingDoc,
-    }))
-  );
+  const { draft, setDraft, loadingDoc, currentPath, dirty, saving, saveDoc, reloadDoc } =
+    useLearningMdStore(
+      useShallow((s) => ({
+        draft: s.draft,
+        setDraft: s.setDraft,
+        loadingDoc: s.loadingDoc,
+        currentPath: s.currentPath,
+        dirty: s.dirty,
+        saving: s.saving,
+        saveDoc: s.saveDoc,
+        reloadDoc: s.reloadDoc,
+      }))
+    );
+
+  const onSave = async () => {
+    try {
+      await saveDoc();
+      message.success("已保存到本地 MD 目录");
+    } catch (e: unknown) {
+      message.error(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const onReload = () =>
+    void reloadDoc()
+      .then(() => message.success("已重新加载"))
+      .catch((e: Error) => message.error(e.message));
 
   const tocItems = useMemo(() => extractToc(draft), [draft]);
 
@@ -40,32 +60,61 @@ export function LearningMdLayout({ showPopoutButton = true }: LearningMdLayoutPr
 
   return (
     <div className="lml-root sketch-card">
-      <div
-        className={
-          showPopoutButton ? "lml-toolbar" : "lml-toolbar lml-toolbar--no-popout-btn"
-        }
-      >
-        {showPopoutButton ? (
+      <header className="lml-toolbar" aria-label="文档视图与保存">
+        <div className="lml-toolbar-start">
+          {showPopoutButton ? (
+            <Button
+              type="default"
+              size="small"
+              className="lml-popout-btn"
+              icon={<ExternalLink size={16} />}
+              onClick={openLearningMdPopout}
+            >
+              新窗口打开
+            </Button>
+          ) : null}
+          <Segmented<PaneMode>
+            size="small"
+            className="lml-pane-segmented"
+            value={pane}
+            onChange={(v) => setPane(v)}
+            options={[
+              { label: "分栏", value: "split" },
+              { label: "仅编辑", value: "edit" },
+              { label: "仅预览", value: "preview" },
+            ]}
+          />
+        </div>
+        <div className="lml-toolbar-end">
+          {dirty ? (
+            <span className="lml-dirty-badge" title="有未保存修改">
+              未保存
+            </span>
+          ) : null}
           <Button
             type="default"
-            className="lml-popout-btn"
-            icon={<ExternalLink size={16} />}
-            onClick={openLearningMdPopout}
+            size="small"
+            className="lml-doc-action"
+            icon={<Save size={16} />}
+            loading={saving}
+            disabled={!currentPath || !dirty}
+            onClick={() => void onSave()}
           >
-            新窗口打开
+            保存
           </Button>
-        ) : null}
-        <Segmented<PaneMode>
-          size="small"
-          value={pane}
-          onChange={(v) => setPane(v)}
-          options={[
-            { label: "分栏", value: "split" },
-            { label: "仅编辑", value: "edit" },
-            { label: "仅预览", value: "preview" },
-          ]}
-        />
-      </div>
+          <Button
+            type="default"
+            size="small"
+            className="lml-doc-action"
+            icon={<RefreshCw size={16} />}
+            loading={loadingDoc}
+            disabled={!currentPath}
+            onClick={onReload}
+          >
+            重新加载
+          </Button>
+        </div>
+      </header>
       <div className="lml-body">
         <aside className="lml-toc" aria-label="文档目录">
           <div className="lml-toc-title">目录</div>

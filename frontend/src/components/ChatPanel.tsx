@@ -11,6 +11,7 @@ const { Text } = Typography;
 export function ChatPanel() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [streamPreview, setStreamPreview] = useState("");
   const { nodes, edges, applyExtendResult, currentCaseSlug } = useAppStore(
     useShallow((s) => ({
       nodes: s.nodes,
@@ -27,6 +28,7 @@ export function ChatPanel() {
       return;
     }
     setLoading(true);
+    setStreamPreview("");
     try {
       const existingNodes = nodes.map((n) => n.id);
       const existingEdges: [string, string, string][] = edges.map((e) => [
@@ -34,11 +36,14 @@ export function ChatPanel() {
         e.target,
         e.relation,
       ]);
-      const res = await postExtend({
-        prompt,
-        case_slug: currentCaseSlug,
-        context: { existingNodes, existingEdges },
-      });
+      const res = await postExtend(
+        {
+          prompt,
+          case_slug: currentCaseSlug,
+          context: { existingNodes, existingEdges },
+        },
+        { onDelta: (t) => setStreamPreview((s) => s + t) }
+      );
       applyExtendResult(res);
       message.success("已根据模型结果更新图谱与 TODO");
       setText("");
@@ -47,6 +52,7 @@ export function ChatPanel() {
       message.error(msg);
     } finally {
       setLoading(false);
+      setStreamPreview("");
     }
   };
 
@@ -59,6 +65,11 @@ export function ChatPanel() {
           结合上方所选学习案例，描述你想补充的概念或问题；模型会返回结构化节点与关系
         </Text>
       </div>
+      {loading && streamPreview ? (
+        <pre className="cp-stream-preview" aria-live="polite">
+          {streamPreview}
+        </pre>
+      ) : null}
       <div className="cp-compose">
         <div className="cp-compose-field">
           <Input.TextArea

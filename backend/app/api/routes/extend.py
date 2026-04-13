@@ -1,15 +1,17 @@
 import json
 import logging
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.db.models import LearningCase
-from app.schemas.graph import ExtendRequest, ExtendResponse
+from app.schemas.graph import ExtendRequest
 from app.services.extend_parse import parse_extend_response
-from app.services.llm import get_chat_llm, invoke_json_object
+from app.services.llm import get_chat_llm, ndjson_llm_stream
 from app.services.prompts import build_extend_system_prompt
 
 logger = logging.getLogger(__name__)
@@ -17,8 +19,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["extend"])
 
 
-@router.post("/api/extend", response_model=ExtendResponse)
-def extend_graph(body: ExtendRequest, db: Session = Depends(get_db)) -> ExtendResponse:
+@router.post("/api/extend")
+def extend_graph(body: ExtendRequest, db: Session = Depends(get_db)) -> StreamingResponse:
     case = db.execute(
         select(LearningCase).where(LearningCase.slug == body.case_slug)
     ).scalar_one_or_none()
@@ -44,12 +46,9 @@ def extend_graph(body: ExtendRequest, db: Session = Depends(get_db)) -> ExtendRe
         ensure_ascii=False,
     )
 
-    try:
-        raw = invoke_json_object(llm, system=system, user=user_content)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("extend invoke failed")
-        raise HTTPException(status_code=502, detail=f"调用语言模型失败：{e!s}") from e
+    def finalize(raw: str) -> dict[str, Any]:
+        return parse_extend_response(raw).model_dump()
 
-    return parse_extend_response(raw)
+
+    gen = ndjson_llm_stream(llm, system=system, user=user_content, finalize=finalize)
+    return StreamingResponse(gen, media_type="application/x-ndjson; charset=utf-8")

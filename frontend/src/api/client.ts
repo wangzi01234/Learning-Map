@@ -75,6 +75,79 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
   return JSON.parse(text) as T;
 }
 
+export interface LlmStreamHandlers {
+  onDelta?: (text: string) => void;
+}
+
+type NdjsonLine<T> =
+  | { type: "delta"; text?: string }
+  | { type: "done"; payload: T }
+  | { type: "error"; detail?: string };
+
+function applyNdjsonLine<T>(line: string, handlers: LlmStreamHandlers | undefined, final: { payload?: T }) {
+  const msg = JSON.parse(line) as NdjsonLine<T>;
+  if (msg.type === "delta" && msg.text && handlers?.onDelta) {
+    handlers.onDelta(msg.text);
+  }
+  if (msg.type === "error") {
+    throw new Error(msg.detail || "流式响应错误");
+  }
+  if (msg.type === "done") {
+    final.payload = msg.payload;
+  }
+}
+
+/**
+ * 消费后端 LLM NDJSON 流（application/x-ndjson）：delta 行为增量文本，done 带业务 payload。
+ */
+export async function postLlmNdjsonStream<T>(
+  path: string,
+  body: unknown,
+  handlers?: LlmStreamHandlers
+): Promise<T> {
+  const url = apiUrl(path);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/x-ndjson, application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    const detail = parseFastApiErrorBody(text);
+    throw new Error(detail || `请求失败 (${res.status})`);
+  }
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error("无法读取响应流");
+  }
+  const decoder = new TextDecoder();
+  let buffer = "";
+  const final: { payload?: T } = {};
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+    let nl: number;
+    while ((nl = buffer.indexOf("\n")) >= 0) {
+      const line = buffer.slice(0, nl).trim();
+      buffer = buffer.slice(nl + 1);
+      if (!line) continue;
+      applyNdjsonLine(line, handlers, final);
+    }
+    if (done) break;
+  }
+  const tail = buffer.trim();
+  if (tail) {
+    applyNdjsonLine(tail, handlers, final);
+  }
+  if (final.payload === undefined) {
+    throw new Error("流已结束但未收到结果");
+  }
+  return final.payload;
+}
+
 export async function putJson<T>(path: string, body: unknown): Promise<T> {
   const url = apiUrl(path);
   const res = await fetch(url, {
@@ -121,8 +194,11 @@ export interface ExtendRequestBody {
   };
 }
 
-export async function postExtend(body: ExtendRequestBody): Promise<ExtendApiResult> {
-  return postJson<ExtendApiResult>("/api/extend", body);
+export async function postExtend(
+  body: ExtendRequestBody,
+  handlers?: LlmStreamHandlers
+): Promise<ExtendApiResult> {
+  return postLlmNdjsonStream<ExtendApiResult>("/api/extend", body, handlers);
 }
 
 export interface ExplainChatMessage {
@@ -143,8 +219,11 @@ export interface ExplainChatApiResult {
   applyExplanation?: string | null;
 }
 
-export async function postExplainChat(body: ExplainChatRequestBody): Promise<ExplainChatApiResult> {
-  return postJson<ExplainChatApiResult>("/api/explain-chat", body);
+export async function postExplainChat(
+  body: ExplainChatRequestBody,
+  handlers?: LlmStreamHandlers
+): Promise<ExplainChatApiResult> {
+  return postLlmNdjsonStream<ExplainChatApiResult>("/api/explain-chat", body, handlers);
 }
 
 export interface GraphSnapshotListItem {
@@ -185,6 +264,26 @@ export async function saveGraphSnapshot(body: {
   return postJson<GraphSnapshotDetail>("/api/graph/snapshots", body);
 }
 
+/** LLM 将 Markdown 转为图谱并写入快照；返回内容与快照详情一致。 */
+export async function postConvertMdToMap(body: {
+  case_slug: string;
+  markdown: string;
+  snapshot_name?: string | null;
+}): Promise<GraphSnapshotDetail> {
+  return postJson<GraphSnapshotDetail>("/api/convert/md-to-map", body);
+}
+
+/** LLM 将当前图谱写成 Markdown 并保存到文档库。 */
+export async function postConvertMapToMd(body: {
+  case_slug: string;
+  nodes: unknown[];
+  edges: unknown[];
+  todos: unknown[];
+  path?: string | null;
+}): Promise<{ path: string; content: string }> {
+  return postJson<{ path: string; content: string }>("/api/convert/map-to-md", body);
+}
+
 export interface MdFileItem {
   path: string;
   title: string;
@@ -204,12 +303,25 @@ export async function putMdDoc(path: string, content: string): Promise<{ path: s
   return putJson<{ path: string; content: string }>("/api/md/doc", { path, content });
 }
 
+/** 与后端 MdAssistLlmOverrides 对应，用于覆盖 init_chat_model */
+export interface MdAssistLlmConfig {
+  model?: string;
+  model_provider?: string;
+  temperature?: number;
+  base_url?: string;
+  api_key?: string;
+  model_kwargs_extra?: Record<string, unknown>;
+}
+
 export interface MdAssistRequestBody {
   path: string;
   markdown: string;
   instruction: string;
   /** 不含本轮；按时间顺序 user/assistant 交替 */
   conversation?: { role: "user" | "assistant"; content: string }[];
+  llm?: MdAssistLlmConfig;
+  /** false 时一次返回 JSON（invoke），默认流式 NDJSON */
+  stream?: boolean;
 }
 
 export interface MdAssistResponseBody {
@@ -219,6 +331,12 @@ export interface MdAssistResponseBody {
   apply_markdown?: string | null;
 }
 
-export async function postMdAssist(body: MdAssistRequestBody): Promise<MdAssistResponseBody> {
-  return postJson<MdAssistResponseBody>("/api/md/assist", body);
+export async function postMdAssist(
+  body: MdAssistRequestBody,
+  handlers?: LlmStreamHandlers
+): Promise<MdAssistResponseBody> {
+  if (body.stream === false) {
+    return postJson<MdAssistResponseBody>("/api/md/assist", body);
+  }
+  return postLlmNdjsonStream<MdAssistResponseBody>("/api/md/assist", body, handlers);
 }

@@ -57,10 +57,70 @@ def build_explain_chat_system_prompt(case: LearningCase) -> str:
 - 不要随意清空解释；若不应改文案，applyExplanation 必须为 null。"""
 
 
+def build_md_to_map_system_prompt(case: LearningCase) -> str:
+    domain = (case.description or "").strip()
+    title = (case.title or "").strip()
+    return f"""你是「Learning Map」结构化助手。用户会提供一篇 Markdown 学习笔记全文，你要提炼为**完整**知识图谱（不是增量），用于保存为图谱快照。
+当前学习案例：**{title}**
+案例说明：{domain or "通用主题，按正文自行归纳。"}
+
+你必须只输出一个合法 JSON 对象（不要 markdown 代码块），结构如下：
+{{
+  "nodes": [
+    {{
+      "id": "小写英文短横线唯一 id",
+      "name": "知识点名称",
+      "year": 0,
+      "category": "概念分类",
+      "description": "一句话简介",
+      "details": {{
+        "explanation": "通俗解释，可与笔记正文对应",
+        "formula": null,
+        "animation": null,
+        "images": [],
+        "code": null,
+        "links": []
+      }}
+    }}
+  ],
+  "edges": [
+    {{"source": "节点id", "target": "节点id", "relation": "启发|衍生|解决|先修|改进|替代|相关", "label": null}}
+  ],
+  "todos": [
+    {{"title": "建议的后续学习项", "description": null, "relatedNodeId": null}}
+  ]
+}}
+硬性要求：
+- nodes 至少 2 个（若正文极短也尽量拆分出可连线的概念）；所有 id 唯一；边的 source/target 必须出现在 nodes 中。
+- relation 只能从上述枚举中选。
+- 内容以简体中文为主；忠实于用户笔记，不杜撰明显无关的概念。
+- 若无合适待学项，todos 可为 []。"""
+
+
+def build_map_to_md_system_prompt(case: LearningCase) -> str:
+    domain = (case.description or "").strip()
+    title = (case.title or "").strip()
+    return f"""你是「Learning MD」写作助手。用户会提供当前知识图谱的 JSON（nodes / edges / todos），你要写成一篇**完整**的 Markdown 学习笔记，便于保存为 .md 文件。
+当前学习案例：**{title}**
+案例说明：{domain or "通用笔记，按图谱组织内容。"}
+
+你必须只输出一个合法 JSON 对象（不要 markdown 代码块），结构如下：
+{{
+  "markdown": "完整 Markdown 字符串"
+}}
+写作要求：
+- 使用一级标题作为文档总标题（可取自案例或图谱主题），用 ## / ### 组织知识点。
+- 每个重要节点应用小节呈现：名称、简介（description）、通俗解释（details.explanation），必要时公式或代码用 Markdown 规范书写。
+- 用简短列表或段落说明节点之间的关系（可引用 edges 的 relation）。
+- 若有 todos，在文末增加「学习待办」小节。
+- 语言自然流畅，以简体中文为主；不要输出图谱 JSON，只输出笔记正文在 markdown 字段。"""
+
+
 def build_md_assist_system_prompt() -> str:
     return """你是「Learning MD」文档助手，帮助用户完善 Markdown 学习笔记。
-用户 JSON 中可能包含 priorConversation（user/assistant 交替的多轮历史），请结合历史理解本轮 instruction；currentMarkdown 为当前文档全文。
-你必须只输出一个合法 JSON 对象（不要 markdown 代码块），结构如下：
+用户 JSON 中可能包含 priorConversation（user/assistant 交替的多轮历史），请结合历史理解本轮 instruction；currentMarkdown 为**当前正在编辑文档的全文**（已由前端传入，不要把它当成需要从磁盘读取的文件）。
+若需要参考**其他**笔记（对齐表述、引用段落、合并另一篇的结构），可调用工具 read_reference_markdown(relative_path)，传入相对文档库根的路径（正斜杠，如 notes/other.md）。不要对 filePath 指向的当前文档调用该工具——其正文已在 currentMarkdown 中。
+在收集到足够信息后，你必须只输出一个合法 JSON 对象（不要 markdown 代码块），结构如下：
 {
   "reply": "用简体中文说明你的思路或回答用户问题",
   "applyMarkdown": "若本轮应更新整篇笔记，则给出**完整**的新 Markdown 全文；若只是答疑、讨论、尚未形成可写入文档的定稿，则填 null"

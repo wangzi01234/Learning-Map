@@ -1,5 +1,6 @@
 import { useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import type { Components } from "react-markdown";
@@ -45,7 +46,11 @@ export function MdMarkdownPreview({ markdown, tocItems }: Props) {
   return (
     <div className="mdmp-root">
       <div className="mdmp-md">
-        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={components}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={components}
+        >
           {markdown || "_（空文档）_"}
         </ReactMarkdown>
       </div>

@@ -1,48 +1,21 @@
 import json
 import logging
-from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.config import get_settings
-from app.services.llm import get_chat_llm, invoke_json_object
+from app.services.llm import get_chat_llm
 from app.services.llm_json import parse_llm_json_object
+from app.services.md_assist_agent import ndjson_stream_from_full_text, run_md_assist_with_tools
+from app.services.md_assist_tools import build_md_assist_tools
+from app.services.md_doc_paths import ensure_inside_md_root, resolve_md_docs_root
 from app.services.prompts import build_md_assist_system_prompt
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["md-docs"])
-
-
-def _resolve_md_root() -> Path:
-    settings = get_settings()
-    raw = (settings.md_docs_root or "").strip()
-    if raw:
-        root = Path(raw).expanduser()
-    else:
-        # md_docs.py → routes → api → app → backend
-        root = Path(__file__).resolve().parents[3] / "docs_md"
-    try:
-        root = root.resolve()
-    except OSError as e:
-        raise HTTPException(status_code=500, detail=f"无法解析 MD_DOCS_ROOT：{e!s}") from e
-    return root
-
-
-def _ensure_inside(root: Path, rel: str) -> Path:
-    rel = rel.strip().replace("\\", "/")
-    if not rel or rel.startswith("..") or "/../" in f"/{rel}/":
-        raise HTTPException(status_code=400, detail="非法路径。")
-    candidate = (root / rel).resolve()
-    try:
-        root_res = root.resolve()
-    except OSError:
-        root_res = root
-    if not str(candidate).startswith(str(root_res)) or candidate.suffix.lower() != ".md":
-        raise HTTPException(status_code=400, detail="仅允许访问根目录下的 .md 文件。")
-    return candidate
 
 
 class MdFileItem(BaseModel):
@@ -65,11 +38,24 @@ class MdAssistTurn(BaseModel):
     content: str
 
 
+class MdAssistLlmOverrides(BaseModel):
+    """覆盖 init_chat_model 相关参数；未填字段沿用服务端环境变量。"""
+
+    model: Optional[str] = None
+    model_provider: Optional[str] = None
+    temperature: Optional[float] = None
+    base_url: Optional[str] = None
+    api_key: Optional[str] = None
+    model_kwargs_extra: Optional[dict[str, Any]] = None
+
+
 class MdAssistBody(BaseModel):
     path: str
     markdown: str
     instruction: str
     conversation: list[MdAssistTurn] = Field(default_factory=list)
+    llm: Optional[MdAssistLlmOverrides] = None
+    stream: bool = True
 
 
 class MdAssistResponse(BaseModel):
@@ -79,7 +65,7 @@ class MdAssistResponse(BaseModel):
 
 @router.get("/api/md/files", response_model=list[MdFileItem])
 def list_md_files() -> list[MdFileItem]:
-    root = _resolve_md_root()
+    root = resolve_md_docs_root()
     if not root.is_dir():
         raise HTTPException(
             status_code=503,
@@ -106,10 +92,10 @@ def list_md_files() -> list[MdFileItem]:
 
 @router.get("/api/md/doc", response_model=MdReadResponse)
 def read_md_doc(path: str) -> MdReadResponse:
-    root = _resolve_md_root()
+    root = resolve_md_docs_root()
     if not root.is_dir():
         raise HTTPException(status_code=503, detail="MD 文档目录未就绪。")
-    fp = _ensure_inside(root, path)
+    fp = ensure_inside_md_root(root, path)
     if not fp.is_file():
         raise HTTPException(status_code=404, detail="文件不存在。")
     try:
@@ -121,9 +107,9 @@ def read_md_doc(path: str) -> MdReadResponse:
 
 @router.put("/api/md/doc", response_model=MdReadResponse)
 def write_md_doc(body: MdWriteBody) -> MdReadResponse:
-    root = _resolve_md_root()
+    root = resolve_md_docs_root()
     root.mkdir(parents=True, exist_ok=True)
-    fp = _ensure_inside(root, body.path)
+    fp = ensure_inside_md_root(root, body.path)
     try:
         fp.parent.mkdir(parents=True, exist_ok=True)
         fp.write_text(body.content, encoding="utf-8", newline="\n")
@@ -132,16 +118,26 @@ def write_md_doc(body: MdWriteBody) -> MdReadResponse:
     return MdReadResponse(path=body.path.strip().replace("\\", "/"), content=body.content)
 
 
-@router.post("/api/md/assist", response_model=MdAssistResponse)
-def md_assist(body: MdAssistBody) -> MdAssistResponse:
+@router.post("/api/md/assist", response_model=None)
+def md_assist(body: MdAssistBody) -> Union[StreamingResponse, MdAssistResponse]:
     instruction = (body.instruction or "").strip()
     if not instruction:
         raise HTTPException(status_code=400, detail="instruction 不能为空。")
-    root = _resolve_md_root()
-    _ensure_inside(root, body.path)
+    root = resolve_md_docs_root()
+    ensure_inside_md_root(root, body.path)
 
+    ov = body.llm
+    temp = 0.3 if (ov is None or ov.temperature is None) else float(ov.temperature)
     try:
-        llm = get_chat_llm(temperature=0.3)
+        llm = get_chat_llm(
+            temperature=temp,
+            model=ov.model if ov else None,
+            model_provider=ov.model_provider if ov else None,
+            base_url=ov.base_url if ov else None,
+            api_key=ov.api_key if ov else None,
+            model_kwargs_extra=ov.model_kwargs_extra if ov else None,
+            json_response=False,
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -161,24 +157,47 @@ def md_assist(body: MdAssistBody) -> MdAssistResponse:
         },
         ensure_ascii=False,
     )
+
+    def finalize(raw: str) -> dict[str, Any]:
+        data = parse_llm_json_object(raw)
+        reply = str(data.get("reply", "")).strip() or "（无回复）"
+        apply_raw = data.get("applyMarkdown")
+        if apply_raw is None:
+            apply_raw = data.get("apply_markdown")
+        apply_markdown: Optional[str]
+        if apply_raw is None or (isinstance(apply_raw, str) and not apply_raw.strip()):
+            apply_markdown = None
+        else:
+            apply_markdown = str(apply_raw).strip()
+        return MdAssistResponse(reply=reply, applyMarkdown=apply_markdown).model_dump()
+
+    tools = build_md_assist_tools(
+        root=root,
+        current_doc_rel=body.path.strip().replace("\\", "/"),
+    )
+
     try:
-        raw = invoke_json_object(llm, system=system, user=user_payload)
+        raw = run_md_assist_with_tools(
+            llm=llm,
+            tools=tools,
+            system=system,
+            user_payload=user_payload,
+        )
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("md-assist invoke failed")
+        logger.exception("md-assist tool run failed")
         raise HTTPException(status_code=502, detail=f"调用语言模型失败：{e!s}") from e
 
-    data = parse_llm_json_object(raw)
+    if body.stream:
+        gen = ndjson_stream_from_full_text(full=raw, finalize=finalize)
+        return StreamingResponse(gen, media_type="application/x-ndjson; charset=utf-8")
 
-    reply = str(data.get("reply", "")).strip() or "（无回复）"
-    apply_raw = data.get("applyMarkdown")
-    if apply_raw is None:
-        apply_raw = data.get("apply_markdown")
-    apply_markdown: Optional[str]
-    if apply_raw is None or (isinstance(apply_raw, str) and not apply_raw.strip()):
-        apply_markdown = None
-    else:
-        apply_markdown = str(apply_raw).strip()
-
-    return MdAssistResponse(reply=reply, applyMarkdown=apply_markdown)
+    try:
+        payload = finalize(raw)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("md-assist parse failed")
+        raise HTTPException(status_code=502, detail=f"解析模型结果失败：{e!s}") from e
+    return MdAssistResponse(**payload)

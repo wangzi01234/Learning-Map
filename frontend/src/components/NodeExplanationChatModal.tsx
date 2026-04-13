@@ -44,25 +44,44 @@ export function NodeExplanationChatModal({ open, node, onClose }: Props) {
     setPendingApply(null);
     const userMsg: ExplainChatMessage = { role: "user", content: text };
     const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
+    setMessages([...nextMessages, { role: "assistant", content: "" }]);
     setInput("");
     setLoading(true);
     try {
-      const res = await postExplainChat({
-        nodeId: node.id,
-        nodeName: node.name,
-        currentExplanation: node.details.explanation ?? "",
-        messages: nextMessages,
-        case_slug: currentCaseSlug,
+      const res = await postExplainChat(
+        {
+          nodeId: node.id,
+          nodeName: node.name,
+          currentExplanation: node.details.explanation ?? "",
+          messages: nextMessages,
+          case_slug: currentCaseSlug,
+        },
+        {
+          onDelta: (t) => {
+            setMessages((prev) => {
+              if (prev.length === 0) return prev;
+              const copy = [...prev];
+              const last = copy[copy.length - 1];
+              if (last?.role === "assistant") {
+                copy[copy.length - 1] = { role: "assistant", content: last.content + t };
+              }
+              return copy;
+            });
+          },
+        }
+      );
+      setMessages((prev) => {
+        const copy = [...prev];
+        copy[copy.length - 1] = { role: "assistant", content: res.reply };
+        return copy;
       });
-      setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
       if (res.applyExplanation != null && res.applyExplanation.trim() !== "") {
         setPendingApply(res.applyExplanation.trim());
       } else {
         setPendingApply(null);
       }
     } catch (e) {
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => prev.slice(0, -2));
       message.error(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);

@@ -30,10 +30,43 @@
 
 .map-assist-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 10px;
+  flex-direction: column;
+  gap: 4px;
   flex-shrink: 0;
+}
+
+.map-assist-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.map-assist-head-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.map-assist-settings-trigger.ant-btn {
+  flex-shrink: 0;
+}
+
+.map-assist-settings-intro {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 12px !important;
+}
+
+.map-assist-settings-form {
+  margin-top: 4px;
+}
+
+.map-assist-settings-reset {
+  padding-left: 0 !important;
+  height: auto !important;
 }
 
 .map-assist-title {
@@ -58,11 +91,6 @@
   flex-direction: column;
   gap: 8px;
   padding: 4px 2px 8px 0;
-}
-
-.map-assist-empty {
-  font-size: 12px !important;
-  padding: 8px 4px;
 }
 
 .map-assist-bubble {

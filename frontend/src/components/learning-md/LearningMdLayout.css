@@ -9,54 +9,126 @@
   box-sizing: border-box;
 }
 
+/* 去掉 sketch-card 内层实线框；最外层圆角沿用全局 .sketch-card */
+.lml-root.sketch-card::before {
+  display: none;
+}
+
+/* 标头：无边框，与下方文档区用背景深浅区分；左视图切换、右文档操作 */
 .lml-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
   flex-shrink: 0;
+  padding: 10px 12px;
+  border-radius: 0;
+  background: var(--ui-header-bg);
+  box-sizing: border-box;
 }
 
-.lml-popout-btn.ant-btn {
+.lml-toolbar-start,
+.lml-toolbar-end {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.lml-toolbar-end {
+  margin-left: auto;
+}
+
+.lml-dirty-badge {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--ui-font-display);
+  color: var(--ui-primary, var(--ui-link));
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--ui-primary, var(--ui-link)) 14%, var(--ui-header-bg));
+}
+
+/* 标头控件：无边框，浅底色块 + 选中/悬停层次 */
+.lml-popout-btn.ant-btn,
+.lml-doc-action.ant-btn,
+.lml-pane-segmented.ant-segmented {
   flex-shrink: 0;
+  border: none !important;
   border-radius: 0 !important;
-  border-style: solid !important;
-  border-width: 1px !important;
-  border-color: var(--ui-border-strong, var(--ui-panel-border)) !important;
   box-shadow: none !important;
-  background: var(--ui-btn-outline-bg, #ffffff) !important;
+  font-family: var(--ui-font-body) !important;
+}
+
+.lml-popout-btn.ant-btn,
+.lml-doc-action.ant-btn {
+  background: color-mix(in srgb, var(--ui-text) 7%, var(--ui-header-bg)) !important;
   color: var(--ui-text-soft, var(--ui-text)) !important;
 }
 
-.lml-popout-btn.ant-btn:hover {
-  background: var(--ui-btn-outline-bg, #ffffff) !important;
-  filter: brightness(0.96);
+.lml-popout-btn.ant-btn:hover,
+.lml-doc-action.ant-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ui-text) 11%, var(--ui-header-bg)) !important;
+  color: var(--ui-link) !important;
+  filter: none;
+}
+
+.lml-doc-action.ant-btn:disabled {
+  opacity: 0.45 !important;
+}
+
+.lml-pane-segmented.ant-segmented {
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--ui-text) 7%, var(--ui-header-bg)) !important;
+}
+
+.lml-pane-segmented .ant-segmented-item {
+  border-radius: 0 !important;
+  color: var(--ui-text-soft, var(--ui-text)) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.lml-pane-segmented .ant-segmented-item:hover {
   color: var(--ui-link) !important;
 }
 
-.lml-toolbar--no-popout-btn {
-  justify-content: flex-end;
+.lml-pane-segmented .ant-segmented-item-selected {
+  background: color-mix(in srgb, var(--ui-text) 14%, var(--ui-header-bg)) !important;
+  color: var(--ui-text) !important;
 }
 
+.lml-pane-segmented .ant-segmented-thumb {
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="mondrian"] .lml-pane-segmented .ant-segmented-item-selected {
+  background: color-mix(in srgb, var(--ui-text) 18%, var(--ui-header-bg)) !important;
+}
+
+/* 文档区（标头以下）：半透明实线外框与内部分隔，与标头背景形成对比 */
 .lml-body {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: row;
   gap: 0;
-  border-radius: var(--ui-radius-md);
-  border: 2px var(--ui-line-style) var(--ui-panel-border);
+  border-radius: 0;
+  border: 1px solid var(--ui-divider-soft, rgba(0, 0, 0, 0.18));
   overflow: hidden;
-  background: var(--ui-panel-chat);
+  background: var(--ui-bg);
 }
 
 .lml-toc {
   width: 220px;
   flex-shrink: 0;
-  border-right: 1px solid var(--ui-border-dash, rgba(0, 0, 0, 0.12));
+  border-right: 1px solid var(--ui-divider-soft, rgba(0, 0, 0, 0.18));
   padding: 10px 8px;
   overflow: auto;
-  background: var(--ui-header-bg);
+  background: color-mix(in srgb, var(--ui-text) 4%, var(--ui-bg));
 }
 
 .lml-toc-title {
@@ -91,7 +163,7 @@
   font-size: 12px;
   line-height: 1.35;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 0;
   color: var(--ui-link);
   font-family: var(--ui-font-body);
 }
@@ -136,7 +208,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-right: 1px solid var(--ui-border-dash, rgba(0, 0, 0, 0.12));
+  border-right: 1px solid var(--ui-divider-soft, rgba(0, 0, 0, 0.18));
 }
 
 .lml-split--one .lml-editor-wrap {

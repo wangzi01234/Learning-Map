@@ -1,0 +1,26 @@
+.mmc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(420px, 100%);
+}
+
+.mmc-btn.ant-btn {
+  font-family: var(--ui-font-display);
+}
+
+.mmc-btn-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mmc-arrow {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+html[data-ui-theme="mondrian"] .mmc-btn.ant-btn {
+  border-radius: 0 !important;
+}

@@ -60,6 +60,10 @@
   flex-shrink: 0;
   margin-left: auto;
   padding-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .app-shell--popout {
@@ -115,24 +119,37 @@
   overflow: hidden;
 }
 
-/* 标题层：左品牌、右工具，底边与内容区一致分隔 */
-.app-grid-cell--title-left,
-.app-grid-cell--title-right {
+/* 标题层：整行一格，左右紧贴；中间仅一条竖线（与底边同款） */
+.app-grid-cell--title-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   overflow: visible;
   background: var(--ui-header-bg);
-  border-bottom: 2px var(--ui-line-style) var(--ui-header-border);
-  padding: 8px 10px 10px;
+  --app-title-sep: 2px var(--ui-line-style) var(--ui-header-border);
+  border-bottom: var(--app-title-sep);
+  padding: 0;
   box-sizing: border-box;
 }
 
-.app-grid-cell--title-left {
-  padding-left: 6px;
+.app-title-bar-left {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: var(--app-title-sep);
+  padding: 8px 10px 10px 6px;
+  box-sizing: border-box;
 }
 
-.app-grid-cell--title-right {
-  padding-left: 8px;
-  padding-top: 12px;
-  border-left: 1px var(--ui-line-style) var(--ui-midline);
+.app-title-bar-right {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px 10px 8px;
+  box-sizing: border-box;
 }
 
 .app-header-brand-block {
@@ -222,28 +239,28 @@ html[data-ui-theme="mondrian"] .app-grid-six {
   padding: 0;
 }
 
-html[data-ui-theme="mondrian"] .app-grid-cell--title-left,
-html[data-ui-theme="mondrian"] .app-grid-cell--title-right {
+html[data-ui-theme="mondrian"] .app-grid-cell--title-bar {
   border-bottom: none !important;
-  border-left: none !important;
+  background: transparent !important;
 }
 
-html[data-ui-theme="mondrian"] .app-grid-cell--title-left {
+html[data-ui-theme="mondrian"] .app-title-bar-left {
+  border-right: none !important;
   background: #ffdd00;
   padding: 8px 10px 10px 10px;
 }
 
-html[data-ui-theme="mondrian"] .app-grid-cell--title-right {
+html[data-ui-theme="mondrian"] .app-title-bar-right {
   background: #005baa;
   --ui-toolbar-label: #ffffff;
   padding: 8px 10px 10px 10px;
 }
 
-html[data-ui-theme="mondrian"] .app-grid-cell--title-right .theme-switcher-trigger.ant-btn {
+html[data-ui-theme="mondrian"] .app-title-bar-right .theme-switcher-trigger.ant-btn {
   color: rgba(255, 255, 255, 0.92) !important;
 }
 
-html[data-ui-theme="mondrian"] .app-grid-cell--title-right .theme-switcher-trigger.ant-btn:hover {
+html[data-ui-theme="mondrian"] .app-title-bar-right .theme-switcher-trigger.ant-btn:hover {
   color: #ffffff !important;
   background: rgba(255, 255, 255, 0.12) !important;
 }
@@ -310,8 +327,11 @@ html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-assist .map-ass
 }
 
 html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-collapse-edge {
-  background: transparent !important;
   color: #ffffff !important;
+}
+
+html[data-ui-theme="mondrian"] .app-grid-cell--md-workspace .lmw-assist--collapsed .lmw-collapse-edge {
+  background: transparent !important;
 }
 
 html[data-ui-theme="mondrian"] .app-grid-cell--chat .cp-root {

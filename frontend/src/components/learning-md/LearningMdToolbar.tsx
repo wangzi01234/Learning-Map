@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Button, Modal, Select, Space, Typography, message } from "antd";
-import { FilePlus, RefreshCw, Save } from "react-feather";
+import { FilePlus } from "react-feather";
 import { useShallow } from "zustand/react/shallow";
 import { useLearningMdStore } from "@/store/useLearningMdStore";
 import "./LearningMdToolbar.css";
@@ -22,8 +22,6 @@ export function LearningMdToolbar({ variant = "main" }: Props) {
     dirty,
     listError,
     openPath,
-    reloadDoc,
-    saveDoc,
     createNewDoc,
     refreshFileList,
   } = useLearningMdStore(
@@ -36,8 +34,6 @@ export function LearningMdToolbar({ variant = "main" }: Props) {
       dirty: s.dirty,
       listError: s.listError,
       openPath: s.openPath,
-      reloadDoc: s.reloadDoc,
-      saveDoc: s.saveDoc,
       createNewDoc: s.createNewDoc,
       refreshFileList: s.refreshFileList,
     }))
@@ -46,15 +42,6 @@ export function LearningMdToolbar({ variant = "main" }: Props) {
   useEffect(() => {
     void refreshFileList();
   }, [refreshFileList]);
-
-  const onSave = async () => {
-    try {
-      await saveDoc();
-      message.success("已保存到本地 MD 目录");
-    } catch (e: unknown) {
-      message.error(e instanceof Error ? e.message : String(e));
-    }
-  };
 
   const runCreateNew = async () => {
     try {
@@ -102,28 +89,6 @@ export function LearningMdToolbar({ variant = "main" }: Props) {
           onClick={() => void onCreateNew()}
         >
           新建
-        </Button>
-        <Button
-          className="sketch-btn"
-          icon={<Save size={16} />}
-          loading={saving}
-          disabled={!currentPath || !dirty}
-          onClick={() => void onSave()}
-        >
-          保存
-        </Button>
-        <Button
-          className="sketch-btn"
-          icon={<RefreshCw size={16} />}
-          loading={loadingDoc}
-          disabled={!currentPath}
-          onClick={() =>
-            void reloadDoc()
-              .then(() => message.success("已重新加载"))
-              .catch((e: Error) => message.error(e.message))
-          }
-        >
-          重新加载
         </Button>
       </Space>
       {listError ? (

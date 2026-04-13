@@ -3,13 +3,14 @@ import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.db.models import LearningCase
 from app.schemas.graph import ExplainChatRequest, ExplainChatResponse
-from app.services.llm import get_chat_llm, invoke_json_object
+from app.services.llm import get_chat_llm, ndjson_llm_stream
 from app.services.llm_json import parse_llm_json_object
 from app.services.prompts import build_explain_chat_system_prompt
 
@@ -30,8 +31,8 @@ def _build_explain_chat_user_payload(body: ExplainChatRequest) -> str:
     )
 
 
-@router.post("/api/explain-chat", response_model=ExplainChatResponse)
-def explain_chat(body: ExplainChatRequest, db: Session = Depends(get_db)) -> ExplainChatResponse:
+@router.post("/api/explain-chat")
+def explain_chat(body: ExplainChatRequest, db: Session = Depends(get_db)) -> StreamingResponse:
     if not body.messages:
         raise HTTPException(status_code=400, detail="messages 不能为空。")
     last = body.messages[-1]
@@ -55,22 +56,16 @@ def explain_chat(body: ExplainChatRequest, db: Session = Depends(get_db)) -> Exp
     system = build_explain_chat_system_prompt(case)
     user_payload = _build_explain_chat_user_payload(body)
 
-    try:
-        raw = invoke_json_object(llm, system=system, user=user_payload)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("explain-chat invoke failed")
-        raise HTTPException(status_code=502, detail=f"调用语言模型失败：{e!s}") from e
+    def finalize(raw: str) -> dict[str, Any]:
+        data = parse_llm_json_object(raw)
+        reply = str(data.get("reply", "")).strip() or "（无回复）"
+        apply_raw = data.get("applyExplanation")
+        apply_explanation: Optional[str]
+        if apply_raw is None or (isinstance(apply_raw, str) and not apply_raw.strip()):
+            apply_explanation = None
+        else:
+            apply_explanation = str(apply_raw).strip()
+        return ExplainChatResponse(reply=reply, applyExplanation=apply_explanation).model_dump()
 
-    data = parse_llm_json_object(raw)
-
-    reply = str(data.get("reply", "")).strip() or "（无回复）"
-    apply_raw = data.get("applyExplanation")
-    apply_explanation: Optional[str]
-    if apply_raw is None or (isinstance(apply_raw, str) and not apply_raw.strip()):
-        apply_explanation = None
-    else:
-        apply_explanation = str(apply_raw).strip()
-
-    return ExplainChatResponse(reply=reply, applyExplanation=apply_explanation)
+    gen = ndjson_llm_stream(llm, system=system, user=user_payload, finalize=finalize)
+    return StreamingResponse(gen, media_type="application/x-ndjson; charset=utf-8")

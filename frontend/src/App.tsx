@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { GitBranch } from "react-feather";
 import { AddRelationModal } from "@/components/AddRelationModal";
 import { AppModeSwitcher } from "@/components/AppModeSwitcher";
+import { MdMapConvertBar } from "@/components/MdMapConvertBar";
 import { CaseBootstrap } from "@/components/CaseBootstrap";
 import { CaseToolbar } from "@/components/CaseToolbar";
 import { ChatPanel } from "@/components/ChatPanel";
@@ -101,32 +102,35 @@ export default function App() {
             viewMode === "learning-md" ? "app-grid-six app-grid-learning-md" : "app-grid-six"
           }
         >
-          <div className="app-grid-cell app-grid-cell--title-left">
-            <div className="app-header-brand-block">
-              <div className="app-header-brand-top">
-                <div className="app-brand">
-                  <GitBranch size={28} strokeWidth={1.75} className="app-brand-icon" />
-                  <Title level={4} className="app-title">
-                    {viewMode === "learning-md" ? "Learning MD" : "Learning Map"}
-                  </Title>
+          <header className="app-grid-cell app-grid-cell--title-bar" aria-label="站点标题与工具栏">
+            <div className="app-title-bar-left">
+              <div className="app-header-brand-block">
+                <div className="app-header-brand-top">
+                  <div className="app-brand">
+                    <GitBranch size={28} strokeWidth={1.75} className="app-brand-icon" />
+                    <Title level={4} className="app-title">
+                      {viewMode === "learning-md" ? "Learning MD" : "Learning Map"}
+                    </Title>
+                  </div>
+                  <div className="app-header-mode-switch-wrap">
+                    <AppModeSwitcher />
+                    <MdMapConvertBar />
+                  </div>
                 </div>
-                <div className="app-header-mode-switch-wrap">
-                  <AppModeSwitcher />
+                <Text type="secondary" className="app-site-tagline">
+                  {viewMode === "learning-md" ? SITE_TAGLINE_MD : SITE_TAGLINE}
+                </Text>
+              </div>
+            </div>
+            <div className="app-title-bar-right">
+              <div className="app-header-toolbar-wrap">
+                <div className="app-header-toolbar-main">
+                  {viewMode === "map" ? <CaseToolbar /> : <LearningMdToolbar />}
                 </div>
+                <ThemeSwitcher />
               </div>
-              <Text type="secondary" className="app-site-tagline">
-                {viewMode === "learning-md" ? SITE_TAGLINE_MD : SITE_TAGLINE}
-              </Text>
             </div>
-          </div>
-          <div className="app-grid-cell app-grid-cell--title-right">
-            <div className="app-header-toolbar-wrap">
-              <div className="app-header-toolbar-main">
-                {viewMode === "map" ? <CaseToolbar /> : <LearningMdToolbar />}
-              </div>
-              <ThemeSwitcher />
-            </div>
-          </div>
+          </header>
           {viewMode === "map" ? (
             <>
               <section className="app-grid-cell app-grid-cell--graph" aria-label="知识图谱">

@@ -98,6 +98,26 @@
   color: var(--ui-text-soft);
 }
 
+.nc-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.95em;
+}
+
+.nc-md th,
+.nc-md td {
+  border: 1px solid var(--ui-border-dash-weak, rgba(0, 0, 0, 0.12));
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.nc-md th {
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
 .nc-explain-chat {
   margin-top: 10px;
   padding-top: 10px;
@@ -166,6 +186,22 @@
 .sketch-btn:hover,
 .sketch-btn-primary:hover {
   filter: brightness(0.97);
+}
+
+.nc-extend-stream {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  max-height: 100px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: var(--ui-radius-md);
+  border: 1px dashed var(--ui-border-dash);
+  background: var(--ui-chat-compose-bg, #ffffff);
+  color: var(--ui-text-muted, #666);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* 蒙德里安 · 右中：去掉白底圆角卡片层，内容直接铺在格底色上 */
